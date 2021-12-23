@@ -6,7 +6,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Scene</title>
-  <script src="https://cdn.babylonjs.com/babylon.max.js"></script>
+  <script type="module" src="./js/babylon.js"></script>
+  <script type="module" src="./js/babylon.objFileLoader.js"></script>
   <style>
     html,
     body {
@@ -28,13 +29,19 @@
 <body>
   <canvas id="renderCanvas"></canvas>
 
-  <script>
+  <script type="module">
     const canvas = document.querySelector("#renderCanvas");
     const engine = new BABYLON.Engine(canvas, true);
 
     createScene().then((scene) => {
       engine.runRenderLoop(function () {
         scene.render();
+      });
+
+      BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
+        const newMesh = BABYLON.Mesh.MergeMeshes(treeScene.meshes, true, true, false, false, true);
+        console.log(newMesh.position)
+        newMesh.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
       });
     });
 
@@ -45,10 +52,11 @@
     async function createScene() {
       const scene = new BABYLON.Scene(engine);
       const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
+      camera.setTarget(new BABYLON.Vector3(0, 10, 0));
       camera.attachControl(canvas, true);
-      const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-      light.intensity = 0.7;
+      camera.position.z = -100;
+      const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 10, 0), scene);
+      light.intensity = 1;
       const sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
       sphere.position.y = 2;
       sphere.position.z = 5;
