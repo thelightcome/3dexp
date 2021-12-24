@@ -34,14 +34,14 @@
     const engine = new BABYLON.Engine(canvas, true);
 
     createScene().then((scene) => {
+      BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
+        for (let key of treeScene.meshes) {
+          key.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+          key.position.z = 50;
+        }
+      });
       engine.runRenderLoop(function () {
         scene.render();
-      });
-
-      BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
-        const newMesh = BABYLON.Mesh.MergeMeshes(treeScene.meshes, true, true, false, false, true);
-        console.log(newMesh.position)
-        newMesh.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
       });
     });
 
@@ -57,9 +57,6 @@
       camera.position.z = -100;
       const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 10, 0), scene);
       light.intensity = 1;
-      const sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
-      sphere.position.y = 2;
-      sphere.position.z = 5;
 
       const xr = await scene.createDefaultXRExperienceAsync({
         uiOptions: {
