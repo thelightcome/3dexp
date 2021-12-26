@@ -35,10 +35,11 @@
 
     createScene().then((scene) => {
       BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
-        for (let key of treeScene.meshes) {
-          key.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
-          key.position.z = 50;
+        for (let i = 0; i < treeScene.meshes.length; i += 1) {
+          const mesh = treeScene.meshes[i];
+          mesh.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
         }
+        createParticles(treeScene.meshes[0], 10000, "./assets/dust1.jpg", new BABYLON.Vector3(5, 5, 5))
       });
       engine.runRenderLoop(function () {
         scene.render();
@@ -48,6 +49,25 @@
     window.addEventListener("resize", () => {
       engine.resize();
     })
+
+    function createParticles(mesh, count, path, point = BABYLON.Vector3.Zero()) {
+      const myParticleSystem = new BABYLON.ParticleSystem("magicDust", count);
+      myParticleSystem.particleTexture = new BABYLON.Texture(path);
+      myParticleSystem.emitter = mesh;
+      myParticleSystem.emitter = point;
+      myParticleSystem.minEmitBox = new BABYLON.Vector3(-200, -20, -200);
+      myParticleSystem.maxEmitBox = new BABYLON.Vector3(200, 50, 200);
+      myParticleSystem.minSize = 0.1;
+      myParticleSystem.maxSize = 0.5;
+      myParticleSystem.color1 = BABYLON.Color3.FromHexString("#8280D3");
+      myParticleSystem.color2 = BABYLON.Color3.FromHexString("#D3D742");
+      myParticleSystem.colorDead = BABYLON.Color3.FromHexString("#7E0078");
+      myParticleSystem.minEmitPower = 1;
+      myParticleSystem.maxEmitPower = 3;
+      myParticleSystem.emitRate = 5000;
+      myParticleSystem.start();
+      return myParticleSystem;
+    }
 
     async function createScene() {
       const scene = new BABYLON.Scene(engine);
