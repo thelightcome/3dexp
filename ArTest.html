@@ -50,7 +50,7 @@
     ];
     const pointerToKey = new Map();
 
-    const scale = 0.06;
+    const scale = 0.08;
    
     let pianoSound;
     let audioCtx;
@@ -59,9 +59,9 @@
       BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
         for (let i = 0; i < treeScene.meshes.length; i += 1) {
           const mesh = treeScene.meshes[i];
-          mesh.scaling = new BABYLON.Vector3(0.07, 0.1, 0.07);
+          mesh.scaling = new BABYLON.Vector3(0.07, 0.07, 0.07);
           mesh.position.y = -8;
-          mesh.position.z = 16;
+          mesh.position.z = 20;
         }
         const music = new BABYLON.Sound("Music", "./assets/ABBA.mp3", scene, null, {
           loop: true,
@@ -125,7 +125,7 @@
       keyboard.position.y += 80;
       scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale);
       piano.position.x = 3;
-      piano.position.z = 25;
+      piano.position.z = 28;
       piano.position.y = -8;
 
       scene.onPointerObservable.add((pointerInfo) => {
