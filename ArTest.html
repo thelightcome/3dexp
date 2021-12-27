@@ -125,7 +125,7 @@
       keyboard.position.y += 80;
       scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale);
       piano.position.x = 3;
-      piano.position.z = 10;
+      piano.position.z = 8;
       piano.position.y = -8;
 
       scene.onPointerObservable.add((pointerInfo) => {
@@ -229,12 +229,12 @@
         optionalFeatures: true,
       });
 
-      // const featuresManager = xrHelper.baseExperience.featuresManager;
+      const featuresManager = xrHelper.baseExperience.featuresManager;
 
-      // const pointerSelection = featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable", {
-      //   xrInput: xrHelper.input,
-      //   enablePointerSelectionOnAllControllers: true        
-      // });
+      const pointerSelection = featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable", {
+        xrInput: xrHelper.input,
+        enablePointerSelectionOnAllControllers: true        
+      });
 
       // const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
       //   xrInput: xrHelper.input,
