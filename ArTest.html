@@ -59,9 +59,8 @@
       BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
         for (let i = 0; i < treeScene.meshes.length; i += 1) {
           const mesh = treeScene.meshes[i];
-          mesh.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
-          mesh.position.z = 5;
-          mesh.position.y = -10;
+          mesh.scaling = new BABYLON.Vector3(0.07, 0.07, 0.07);
+          mesh.position.z = 20;
         }
         createParticles(treeScene.meshes[0], 50000, "./assets/dust1.jpg", new BABYLON.Vector3(5, 5, 5));
         createPiano(scene);
@@ -120,7 +119,7 @@
       keyboard.position.y += 80;
       scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale);
       piano.position.x = 15;
-      piano.position.y = -10;
+      piano.position.z = 18;
       piano.rotation.y = Math.PI / 4;
 
       scene.onPointerObservable.add((pointerInfo) => {
@@ -201,8 +200,8 @@
 
     async function createScene() {
       const scene = new BABYLON.Scene(engine);
-      const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 10, -80), scene);
-      camera.setTarget(new BABYLON.Vector3(0, 10, 0));
+      const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 2, -80), scene);
+      camera.setTarget(new BABYLON.Vector3(0, 2, 0));
       camera.attachControl(canvas, true);
       const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 10, 0), scene);
       light.intensity = 1;
