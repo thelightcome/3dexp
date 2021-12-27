@@ -208,14 +208,12 @@
 
       // const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400, height: 400});
 
-      const xr = await scene.createDefaultXRExperienceAsync({
+      const xrHelper = await scene.createDefaultXRExperienceAsync({
         uiOptions: {
           sessionMode: "immersive-ar",
         },
         optionalFeatures: true,
       });
-
-      const xrHelper = await scene.createDefaultXRExperienceAsync();
 
       const featuresManager = xrHelper.baseExperience.featuresManager;
 
@@ -224,11 +222,11 @@
         enablePointerSelectionOnAllControllers: true        
       });
 
-      // const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
-      //   xrInput: xrHelper.input,
-      //   floorMeshes: [ground],
-      //   snapPositions: [new BABYLON.Vector3(2.4*3.5*scale, 0, -10*scale)],
-      // });
+      const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
+        xrInput: xrHelper.input,
+        floorMeshes: [ground],
+        snapPositions: [new BABYLON.Vector3(2.4*3.5*scale, 0, -10*scale)],
+      });
 
       return scene;
     };
