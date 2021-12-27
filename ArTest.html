@@ -61,7 +61,7 @@
           const mesh = treeScene.meshes[i];
           mesh.scaling = new BABYLON.Vector3(0.07, 0.07, 0.07);
           mesh.position.y = -8;
-          mesh.position.z = 20;
+          mesh.position.z = 0;
         }
         const music = new BABYLON.Sound("Music", "./assets/ABBA.mp3", scene, null, {
           loop: true,
@@ -125,7 +125,7 @@
       keyboard.position.y += 80;
       scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale);
       piano.position.x = 3;
-      piano.position.z = 28;
+      piano.position.z = 10;
       piano.position.y = -8;
 
       scene.onPointerObservable.add((pointerInfo) => {
