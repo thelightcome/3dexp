@@ -59,7 +59,7 @@
       BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
         for (let i = 0; i < treeScene.meshes.length; i += 1) {
           const mesh = treeScene.meshes[i];
-          mesh.scaling = new BABYLON.Vector3(0.01, 0.01, 0.01);
+          mesh.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
           mesh.position.z = 5;
           mesh.position.y = -5;
         }
@@ -201,10 +201,9 @@
 
     async function createScene() {
       const scene = new BABYLON.Scene(engine);
-      const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 10, -10), scene);
-      camera.setTarget(new BABYLON.Vector3(0, 5, 0));
+      const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 10, -80), scene);
+      camera.setTarget(new BABYLON.Vector3(0, 10, 0));
       camera.attachControl(canvas, true);
-      camera.position.z = -50;
       const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 10, 0), scene);
       light.intensity = 1;
 
