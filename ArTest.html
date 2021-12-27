@@ -61,7 +61,7 @@
           const mesh = treeScene.meshes[i];
           mesh.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
           mesh.position.z = 5;
-          mesh.position.y = -5;
+          mesh.position.y = -10;
         }
         createParticles(treeScene.meshes[0], 50000, "./assets/dust1.jpg", new BABYLON.Vector3(5, 5, 5));
         createPiano(scene);
@@ -120,7 +120,7 @@
       keyboard.position.y += 80;
       scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale);
       piano.position.x = 15;
-      piano.position.y = -5;
+      piano.position.y = -10;
       piano.rotation.y = Math.PI / 4;
 
       scene.onPointerObservable.add((pointerInfo) => {
