@@ -59,10 +59,15 @@
       BABYLON.SceneLoader.Append("./assets/tree/", "model.obj", scene, function (treeScene) {
         for (let i = 0; i < treeScene.meshes.length; i += 1) {
           const mesh = treeScene.meshes[i];
-          mesh.scaling = new BABYLON.Vector3(0.07, 0.07, 0.07);
+          mesh.scaling = new BABYLON.Vector3(0.07, 0.1, 0.07);
           mesh.position.y = -8;
-          mesh.position.z = 20;
+          mesh.position.z = 16;
         }
+        const music = new BABYLON.Sound("Music", "./assets/ABBA.mp3", scene, null, {
+          loop: true,
+          volume: 0.2,
+          autoplay: true
+        });
         createParticles(treeScene.meshes[0], 50000, "./assets/dust1.jpg", new BABYLON.Vector3(5, 5, 5));
         createPiano(scene);
       });
@@ -119,10 +124,9 @@
 
       keyboard.position.y += 80;
       scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale);
-      piano.position.x = 13;
-      piano.position.z = 15;
+      piano.position.x = 3;
+      piano.position.z = 25;
       piano.position.y = -8;
-      piano.rotation.y = Math.PI / 3;
 
       scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
