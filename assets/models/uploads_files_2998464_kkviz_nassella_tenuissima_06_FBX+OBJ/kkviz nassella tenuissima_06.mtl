@@ -1,0 +1,32 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 20.01.2021 17:50:02
+
+newmtl kkviz_nassella_tenuissima_01_stem
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka F:\kkviz nassella tenuissima\kkviz nassella tenuissima stem_01 alb.jpg
+	map_Kd F:\kkviz nassella tenuissima\kkviz nassella tenuissima stem_01 alb.jpg
+	map_bump F:\kkviz nassella tenuissima\kkviz nassella tenuissima stem_01 nrm.jpg
+	bump F:\kkviz nassella tenuissima\kkviz nassella tenuissima stem_01 nrm.jpg
+
+newmtl kkviz_nassella_tenuissima_01_leaves2_F
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka F:\kkviz nassella tenuissima\kkviz nassella tenuissima leaves_02 alb.jpg
+	map_Kd F:\kkviz nassella tenuissima\kkviz nassella tenuissima leaves_02 alb.jpg

@@ -212,11 +212,11 @@
       const radius = 220;
       const target = new BABYLON.Vector3(0, 2, 0);
 
-      const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
-      camera.attachControl(canvas, true);
+      const camera = new BABYLON.DeviceOrientationCamera("DevOr_camera", new BABYLON.Vector3(0, 2, -20), scene);
+      // const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
       // const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 2, -80), scene);
-      // camera.setTarget(new BABYLON.Vector3(0, 2, 0));
-      // camera.attachControl(canvas, true);
+      camera.setTarget(new BABYLON.Vector3(0, 2, 0));
+      camera.attachControl(canvas, true);
       const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 10, 0), scene);
       light.intensity = 1;
 

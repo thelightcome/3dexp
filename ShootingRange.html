@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shooting Range</title>
+  <script type="module" src="./js/babylon.js"></script>
+  <script type="module" src="./js/babylonjs.loaders.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"
+    integrity="sha512-avLcnGxl5mqAX/wIKERdb1gFNkOLHh2W5JNCfJm5OugpEPBz7LNXJJ3BDjjwO00AxEY1MqdNjtEmiYhKC0ld7g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+  <script src="./js/oimo.js"></script>
+  <style>
+    @font-face {
+      font-family: BLOODY;
+      src: url("./assets/fonts/bloody/BLOODY.TTF");
+    }
+
+    html,
+    body {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    .killer-detected {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18rem;
+      color: #800000;
+      font-family: BLOODY, serif;
+      text-align: center;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .killer-detected.active {
+      display: flex;
+    }
+
+    .killer-detected span {
+      animation: animOpac 1s infinite linear alternate;
+    }
+
+    @keyframes animOpac {
+      0% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    .killer-detected::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("./assets/blood.png");
+      background-size: 100% 100%;
+      z-index: 5;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="killer-detected">
+    <span>KILLER DETECTED</span>
+  </div>
+  <audio class="bloodtheme" src="./assets/music/bloodtheme.mp3"></audio>
+  <audio class="sirena" src="./assets/music/sirena.mp3"></audio>
+
+  <script type="module">
+    const canvas = document.querySelector("#canvas");
+    const engine = new BABYLON.Engine(canvas, true);
+
+    const WORLD_SIZE = 300;
+    const DISTANCE = -25;
+    const CAMERA_HEIGHT = 1;
+    const gravityVector = new BABYLON.Vector3(0, -10, 0);
+
+    const pointerDownEvent = [];
+
+    gameStart();
+
+    async function gameStart() {
+      const { scene } = await createScene();
+
+      const gunshotSound = new BABYLON.Sound("gunshot", "./assets/sound/shot.mp3", scene);
+      const bottleSound = new BABYLON.Sound("gunshot", "./assets/sound/bottle.mp3", scene);
+      const groundSound = new BABYLON.Sound("gunshot", "./assets/sound/ground.mp3", scene);
+      const betonSound = new BABYLON.Sound("gunshot", "./assets/sound/beton.mp3", scene);
+      BABYLON.SceneLoader.ImportMesh(null, "./assets/models/shotgun/", "Shotgun.obj", scene, function (meshes) {
+        const camera = scene.activeCameras[0];
+        const mesh = meshes[0];
+        mesh.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
+        mesh.parent = camera;
+        mesh.rotation.y = 1.475;
+        mesh.rotation.z = -0.1;
+        mesh.position = new BABYLON.Vector3(0.28, -0.6, 1.4);
+        const meshMaterial = mesh.material;
+        meshMaterial.diffuseTexture = new BABYLON.Texture("./assets/models/shotgun/Sg_Diffuse.png");
+        meshMaterial.specularTexture  = new BABYLON.Texture("./assets/models/shotgun/Sg_Spec.png");
+        meshMaterial.bumpTexture = new BABYLON.Texture("./assets/models/shotgun/Sg_normals.png");
+        meshMaterial.detailMap.texture = new BABYLON.Texture("./assets/models/shotgun/Dkk.jpg");
+        const muzzle = new BABYLON.TransformNode("muzzle");
+        muzzle.parent = mesh;
+        muzzle.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
+        muzzle.position = new BABYLON.Vector3(-15, 2, 1);
+        const shotEffect = new BABYLON.ParticleSystem("particles", 1, scene);
+        shotEffect.particleTexture = new BABYLON.Texture("./assets/txt/fire-effect-gun.png");
+        shotEffect.isLocal = true;
+        shotEffect.direction1 = new BABYLON.Vector3(-1, 0, 0);
+        shotEffect.emitter = muzzle;
+        shotEffect.minEmitPower = 1;
+        shotEffect.maxEmitPower = 1;
+        shotEffect.minSize = 0.15;
+        shotEffect.maxSize = 0.15;
+        shotEffect.updateSpeed = 0.5;
+        shotEffect.targetStopDuration = 1;
+
+        const frameRate = 5;
+        const zSlide = new BABYLON.Animation("zSlide", "position.z", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const keyFrames = [];
+        keyFrames.push({
+            frame: 0,
+            value: 1.3,
+        });
+        keyFrames.push({
+            frame: frameRate,
+            value: 1.4,
+        });
+        zSlide.setKeys(keyFrames);
+        mesh.animations.push(zSlide);
+        const zRotate = new BABYLON.Animation("zRotate", "rotation.z", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const keyFrames2 = [];
+        keyFrames2.push({
+            frame: 0,
+            value: -0.2,
+        });
+        keyFrames2.push({
+            frame: frameRate,
+            value: -0.1,
+        });
+        zRotate.setKeys(keyFrames2);
+        mesh.animations.push(zRotate);
+        const cameraDribble = new BABYLON.Animation("cameraDribble", "rotation.x", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const keyFrames3 = [];
+        keyFrames3.push({
+            frame: 0,
+            value: -0.05,
+        });
+        keyFrames3.push({
+            frame: frameRate,
+            value: 0,
+        });
+        cameraDribble.setKeys(keyFrames3);
+        camera.animations.push(cameraDribble);
+
+        const betonDecalMat = new BABYLON.StandardMaterial("betonDecalMat", scene);
+        betonDecalMat.diffuseTexture = new BABYLON.Texture("./assets/txt/beton-hole.png", scene);
+        betonDecalMat.diffuseTexture.hasAlpha = true;
+        betonDecalMat.zOffset = -2;
+        const groundDecalMat = new BABYLON.StandardMaterial("groundDecalMat", scene);
+        groundDecalMat.diffuseTexture = new BABYLON.Texture("./assets/txt/sand-hole.png", scene);
+        groundDecalMat.diffuseTexture.hasAlpha = true;
+        groundDecalMat.zOffset = -2;
+
+        pointerDownEvent.push((hit) => {
+          gunshotSound.play();
+          shotEffect.start();
+          scene.beginAnimation(camera, 0, 10);
+          scene.beginAnimation(mesh, 0, 10);
+          const pickedMesh = hit.pickedMesh;
+          if (pickedMesh && pickedMesh.physicsImpostor) {
+            pickedMesh.physicsImpostor.applyImpulse(hit.pickedPoint.subtract(camera.position).scale(0.8), hit.pickedPoint);
+          }
+          let decalMat;
+          if (pickedMesh) {
+            switch (pickedMesh.name) {
+              case "can": {
+                bottleSound.play();
+                break;
+              }
+              case "beton": {
+                betonSound.play();
+                decalMat = betonDecalMat;
+                break;
+              }
+              case "ground": {
+                groundSound.play();
+                decalMat = groundDecalMat;
+                break;
+              }
+              case "simpleman": {
+                killerDetected(scene);
+                break;
+              }
+            }
+          }
+          if (decalMat) {
+            const decal = BABYLON.MeshBuilder.CreateDecal("decal", pickedMesh,  {position: hit.pickedPoint, normal: hit.getNormal(true), size: new BABYLON.Vector3(0.1, 0.1, 0.1)}, scene);
+            decal.material = decalMat;
+          }
+        })
+      });
+
+      BABYLON.SceneLoader.ImportMesh(null, "./assets/models/wooden_fence/", "13078_Wooden_Post_and_Rail_Fence_v1_l3.obj", scene, function (meshes) {
+        const newMesh = BABYLON.Mesh.MergeMeshes(meshes, true, false, false, false, true);
+        newMesh.scaling = new BABYLON.Vector3(0.01, 0.01, 0.01);
+        newMesh.rotation.x = -Math.PI / 2;
+        newMesh.position.x = -6.75;
+        newMesh.position.z = -42.5;
+        newMesh.rotation.y = -Math.PI / 2;
+        [{ x: -6.75, z: -39.8, y: -Math.PI / 2 }, { x: -6.75, z: -37.1, y: -Math.PI / 2 }, { x: -6.3, z: -34.95, y: 0 }, { x: -3.6, z: -34.95, y: 0 }, { x: -0.9, z: -34.95, y: 0 }, { x: 1.8, z: -34.95, y: 0 }, { x: 4.5, z: -34.95, y: 0 }, { x: 6.75, z: -42.5, y: -Math.PI / 2 }, { x: 6.75, z: -39.8, y: -Math.PI / 2 }, { x: 6.75, z: -37.1, y: -Math.PI / 2 }, { x: -6.3, z: -43, y: 0 }, { x: -3.6, z: -43, y: 0 }, { x: -0.9, z: -43, y: 0 }, { x: 1.8, z: -43, y: 0 }, { x: 4.5, z: -43, y: 0 },].forEach((obj, index) => {
+          const newInstance = newMesh.createInstance("newMesh-" + index);
+          newInstance.position.x = obj.x;
+          newInstance.position.z = obj.z;
+          newInstance.rotation.y = obj.y;
+        });
+      });
+
+      BABYLON.SceneLoader.ImportMesh(null, "./assets/models/uaz/", "UAZobj.obj", scene, function (meshes) {
+        const newMesh = BABYLON.Mesh.MergeMeshes(meshes, true, false, false, false, false);
+        newMesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
+        newMesh.position.z = -42;
+        newMesh.rotation.y = -0.3;
+        newMesh.position.x = 15;
+        newMesh.position.y = -0.6;
+      });
+
+      BABYLON.SceneLoader.ImportMesh(null, "./assets/models/simpleman/", "maleblend.obj", scene, function (meshes, particleSystems, skeletons, animationGroups) {
+        const human = meshes[1];
+        human.material.diffuseTexture = new BABYLON.Texture("./assets/models/simpleman/Casual_male_Albedo.png");
+        human.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
+        human.position.z = -40;
+        human.rotation.y = -0.3;
+        human.position.x = 10;
+        human.name = "simpleman";
+      });
+
+      createSkyBox(scene);
+
+      createGround(scene);
+
+      const plantCount = WORLD_SIZE * 10;
+      const plantArea = WORLD_SIZE / 3;
+      const plantSpriteManager = new BABYLON.SpriteManager("flora", "./assets/txt/plant.png", plantCount, { width: 972, height: 989 }, scene);
+      const plantSpriteManager1 = new BABYLON.SpriteManager("flora", "./assets/txt/plant2.png", plantCount, { width: 972, height: 989 }, scene);
+      const plantSpriteManager2 = new BABYLON.SpriteManager("flora", "./assets/txt/plant3.png", plantCount, { width: 972, height: 989 }, scene);
+      const plantSpriteManager3 = new BABYLON.SpriteManager("flora", "./assets/txt/plant4.png", plantCount, { width: 972, height: 989 }, scene);
+
+      for (let i = 0; i < plantCount; i++) {
+        setPlantSprite(plantSpriteManager);
+        setPlantSprite(plantSpriteManager1, 0.5, 0.5, 0);
+        setPlantSprite(plantSpriteManager2, 0.5, 0.5, 0);
+        setPlantSprite(plantSpriteManager3, 0.5, 0.5, 0.1);
+      }
+
+      function setPlantSprite(plantSpriteManager, width = 0.5, height = 0.5, posY = 0.3) {
+        const plant = new BABYLON.Sprite("tree", plantSpriteManager);
+        plant.width = width;
+        plant.height = height;
+        plant.position.y = posY;
+        plant.position.x = BABYLON.Scalar.RandomRange(-plantArea, plantArea);
+        plant.position.z = BABYLON.Scalar.RandomRange(-plantArea, plantArea);
+      }
+
+      createBeton(scene, 15, 1, 1, "./assets/txt/beton.jpg", new BABYLON.Vector3(0, 0.5, DISTANCE), 0);
+      for (let i = 0; i < 10; i += 1) {
+        createBottle(scene, 0.2, 0.1, "./assets/txt/can_txt.jpg", new BABYLON.Vector3(5 - i, 1.1, DISTANCE));
+      }
+
+      scene.onPointerDown = function() {
+        const ray = scene.createPickingRay(canvas.clientWidth / 2, canvas.clientHeight / 2, BABYLON.Matrix.Identity(), scene.activeCameras[0]);	
+        const hit = scene.pickWithRay(ray);
+        pointerDownEvent.forEach(func => {
+          func(hit);
+        });
+      }
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+    };
+
+    async function createScene() {
+      const scene = new BABYLON.Scene(engine);
+      scene.collisionsEnabled = true;
+      createPointerLock(scene);
+      scene.enablePhysics(gravityVector, new BABYLON.OimoJSPlugin());
+
+      const hemiLight = new BABYLON.HemisphericLight("HemiLight", new BABYLON.Vector3(0, 50, 0), scene);
+
+      const dirLight = new BABYLON.DirectionalLight("DirLight", new BABYLON.Vector3(0, -1, 0), scene);
+      dirLight.position = new BABYLON.Vector3(0, 15, -30);
+
+      const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, CAMERA_HEIGHT, -40));
+      camera.attachControl(canvas, true);
+      camera.fov = 0.7;
+      camera.inertia = 0.5;
+      camera.checkCollisions = true;
+      camera.applyGravity = true;
+      camera.keysUp = [87];
+      camera.keysDown = [83];
+      camera.keysLeft = [65];
+      camera.keysRight = [68];
+      camera.angularSensibility = 1000;
+      camera.ellipsoid = new BABYLON.Vector3(2, 0.5, 2);
+      camera.speed = 0.5;
+      camera.noRotationConstraint = true;
+      scene.beforeRender = function() {
+        if (camera.rotation.x < -0.35) camera.rotation.x = -0.35;
+        if (camera.rotation.x > 0.3) camera.rotation.x = 0.3;
+        if (camera.rotation.y < -1.2) camera.rotation.y = -1.2;
+        if (camera.rotation.y > 1.2) camera.rotation.y = 1.2;
+        if (camera.position.x < -5) camera.position.x = -5;
+        if (camera.position.x > 5) camera.position.x = 5;
+        if (camera.position.z < -42) camera.position.z = -42;
+        if (camera.position.z > -37) camera.position.z = -37;
+      };
+      addGunSight(scene);
+
+      return {
+        scene,
+      };
+    }
+
+    function createSkyBox(scene) {
+      const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: WORLD_SIZE, sideOrientation: BABYLON.Mesh.BACKSIDE}, scene);
+      const skyboxMaterial = new BABYLON.BackgroundMaterial("skyBox", scene);
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skyboxs/TropicalSunnyDay/TropicalSunnyDay", scene);
+      skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+      skybox.material = skyboxMaterial;
+    }
+
+    function createGround(scene) {
+      const groundMaterial = new BABYLON.StandardMaterial("groundMat");
+      groundMaterial.diffuseTexture = new BABYLON.Texture("./assets/grounds/ground.jpg", scene);
+      groundMaterial.diffuseTexture.uScale = WORLD_SIZE / 5.0;
+      groundMaterial.diffuseTexture.vScale = WORLD_SIZE / 5.0;
+      groundMaterial.detailMap.texture = new BABYLON.Texture("./assets/grounds/Sand/Sand.jpg", scene);
+      groundMaterial.detailMap.diffuseBlendLevel = 0.1;
+      groundMaterial.detailMap.bumpLevel = 1;
+      groundMaterial.detailMap.roughnessBlendLevel = 0.25;
+      const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: WORLD_SIZE, height: WORLD_SIZE });
+      ground.material = groundMaterial;
+      ground.checkCollisions = true;
+      ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.9, restitution: 0.3, ignoreParent: true, disableBidirectionalTransformation: true });
+    }
+
+    function createBeton(scene, width, height, depth, txtPath, position = new BABYLON.Vector3(0, 0, 0), mass = 100) {
+      const tableMat = new BABYLON.StandardMaterial("material", scene);
+      if (txtPath) {
+        tableMat.diffuseTexture = new BABYLON.Texture(txtPath);
+      }
+      const box = BABYLON.MeshBuilder.CreateBox("beton", { width: width, height: height, depth: depth, }, scene);
+      box.material = tableMat;
+      box.position = position;
+      box.checkCollisions = true;
+      box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: mass, friction: 0.8, restitution: 0.2, ignoreParent: true, disableBidirectionalTransformation: true }, scene);
+
+      return box;
+    }
+
+    function createBottle(scene, height, diameter, txtPath, position = new BABYLON.Vector3(0, 0, 0), mass = 1) {
+      const canMaterial = new BABYLON.StandardMaterial("material", scene);
+      canMaterial.diffuseTexture = new BABYLON.Texture(txtPath);
+      const faceUV = [];
+      faceUV[0] =	new BABYLON.Vector4(0, 0, 0, 0);
+      faceUV[1] =	new BABYLON.Vector4(1, 0, 0.25, 1);
+      faceUV[2] = new BABYLON.Vector4(0, 0, 0.24, 1);
+      const faceColors = [ ];
+      faceColors[0] = new BABYLON.Color4(0.5, 0.5, 0.5, 1);
+      
+      const can = BABYLON.MeshBuilder.CreateCylinder("can", {height: height, diameter: diameter, faceUV: faceUV, faceColors: faceColors});
+	    can.material = canMaterial;
+      can.position = position;
+      can.checkCollisions = true;
+      can.physicsImpostor = new BABYLON.PhysicsImpostor(can, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: mass, friction: 0.2, restitution: 0.5, ignoreParent: true, disableBidirectionalTransformation: true }, scene);
+
+      return can;
+    }
+
+    function addGunSight(scene) {
+      if (scene.activeCameras.length === 0) {
+        scene.activeCameras.push(scene.activeCamera);
+      }
+      const secondCamera = new BABYLON.FreeCamera("GunSightCamera", new BABYLON.Vector3(0, 0, -50), scene);
+      secondCamera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+      secondCamera.layerMask = 0x20000000;
+      scene.activeCameras.push(secondCamera);
+
+      const meshes = [];
+      const h = 250;
+      const w = 250;
+
+      const y = BABYLON.Mesh.CreateBox("y", h * 0.2, scene);
+      y.scaling = new BABYLON.Vector3(0.05, 1, 1);
+      y.position = new BABYLON.Vector3(0, 0, 0);
+      meshes.push(y);
+
+      const x = BABYLON.Mesh.CreateBox("x", h * 0.2, scene);
+      x.scaling = new BABYLON.Vector3(1, 0.05, 1);
+      x.position = new BABYLON.Vector3(0, 0, 0);
+      meshes.push(x);
+
+      const lineTop = BABYLON.Mesh.CreateBox("lineTop", w * 0.8, scene);
+      lineTop.scaling = new BABYLON.Vector3(1, 0.005, 1);
+      lineTop.position = new BABYLON.Vector3(0, h * 0.5, 0);
+      meshes.push(lineTop);
+
+      const lineBottom = BABYLON.Mesh.CreateBox("lineBottom", w * 0.8, scene);
+      lineBottom.scaling = new BABYLON.Vector3(1, 0.005, 1);
+      lineBottom.position = new BABYLON.Vector3(0, h * -0.5, 0);
+      meshes.push(lineBottom);
+
+      const lineLeft = BABYLON.Mesh.CreateBox("lineLeft", h, scene);
+      lineLeft.scaling = new BABYLON.Vector3(0.01, 1, 1);
+      lineLeft.position = new BABYLON.Vector3(w * -0.4, 0, 0);
+      meshes.push(lineLeft);
+
+      const lineRight = BABYLON.Mesh.CreateBox("lineRight", h, scene);
+      lineRight.scaling = new BABYLON.Vector3(0.01, 1, 1);
+      lineRight.position = new BABYLON.Vector3(w * 0.4, 0, 0);
+      meshes.push(lineRight);
+
+      const gunSight = BABYLON.Mesh.MergeMeshes(meshes);
+      gunSight.isPickable = false;
+      gunSight.name = "gunSight";
+      gunSight.layerMask = 0x20000000;
+      gunSight.freezeWorldMatrix();
+
+      const mat = new BABYLON.StandardMaterial("emissive mat", scene);
+      mat.checkReadyOnlyOnce = true;
+      mat.emissiveColor = new BABYLON.Color3(0, 1, 0);
+
+      gunSight.material = mat;
+    }
+
+    function createPointerLock(scene) {
+      let canvas = scene.getEngine().getRenderingCanvas();
+      canvas.addEventListener("click", event => {
+        canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+        if(canvas.requestPointerLock) {
+          canvas.requestPointerLock();
+        }
+      }, false);
+    };
+    
+    function killerDetected(scene) {
+      const killerDetectedBlock = document.querySelector(".killer-detected");
+      const bloodtheme = document.querySelector(".bloodtheme");
+      const sirena = document.querySelector(".sirena");
+      killerDetectedBlock.classList.add("active");
+      document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
+      document.exitPointerLock();
+      bloodtheme.play();
+      sirena.play();
+    }
+
+    window.addEventListener("resize", () => {
+      engine.resize();
+    })
+  </script>
+</body>
+
+</html>
