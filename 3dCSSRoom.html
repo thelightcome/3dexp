@@ -437,13 +437,24 @@
       return window.clientWidth < window.clientHeight;
     }
 
+    let betaAdd = 0;
+    let gammaAdd = 0;
+
     function handleOrientation(e) {
+      if (event.beta >= 180) betaAdd = 180;
+      else if (event.beta <= -180) betaAdd = -180;
+      else betaAdd = 0;
+
+      if (event.gamma >= 90) gammaAdd = 180;
+      else if (event.gamma <= -90) gammaAdd = -180;
+      else gammaAdd = 0;
+
       if (checkMobileOrientation()) {
-        curDegX = event.beta;
-        curDegY = event.gamma - 90;
+        curDegX = betaAdd + event.beta;
+        curDegY = gammaAdd + event.gamma - 90;
       } else {
-        curDegX = event.gamma - 90;
-        curDegY = event.beta;
+        curDegX = gammaAdd + event.gamma - 90;
+        curDegY = betaAdd + event.beta;
       }
     }
 
