@@ -450,7 +450,7 @@
       // else gammaAdd = 0;
 
       // if (checkMobileOrientation()) {
-      curDegX = gammaAdd + event.gamma - 90;
+      curDegX = gammaAdd + event.gamma - 45;
       curDegY = -1 * (betaAdd + event.beta);
       // } else {
       //   curDegX = betaAdd + event.alpha;
@@ -480,7 +480,7 @@
     }
 
     if (mobileCheck()) {
-      alert("test 4");
+      alert("test 5");
       window.addEventListener("deviceorientation", handleOrientation, true);
     } else {
       room.addEventListener("mousemove", cameraMove);
