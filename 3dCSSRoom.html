@@ -441,13 +441,13 @@
     let gammaAdd = 0;
 
     function handleOrientation(e) {
-      if (event.beta >= 180) betaAdd = 180;
-      else if (event.beta <= -180) betaAdd = -180;
-      else betaAdd = 0;
+      // if (event.beta >= 180) betaAdd = 180;
+      // else if (event.beta <= -180) betaAdd = -180;
+      // else betaAdd = 0;
 
-      if (event.gamma >= 90) gammaAdd = 180;
-      else if (event.gamma <= -90) gammaAdd = -180;
-      else gammaAdd = 0;
+      // if (event.gamma >= 90) gammaAdd = 180;
+      // else if (event.gamma <= -90) gammaAdd = -180;
+      // else gammaAdd = 0;
 
       if (checkMobileOrientation()) {
         curDegX = betaAdd + event.beta;
@@ -480,7 +480,7 @@
     }
 
     if (mobileCheck()) {
-      alert("gamma beta cdjs", checkMobileOrientation());
+      alert("test 1", checkMobileOrientation());
       window.addEventListener("deviceorientation", handleOrientation, true);
     } else {
       room.addEventListener("mousemove", cameraMove);
