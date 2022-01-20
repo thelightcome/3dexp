@@ -432,9 +432,18 @@
       cameraMoveY = 0.01 * Math.round((dY * maxCamRotate / centerY) * 50);
     }
 
+    function checkMobileOrientation() {
+      return window.clientWidth < window.clientHeight;
+    }
+
     function handleOrientation(e) {
-      curDegX = event.beta;
-      curDegY = event.gamma;
+      if (checkMobileOrientation()) {
+        curDegX = event.alpha;
+        curDegY = event.beta;
+      } else {
+        curDegX = event.beta;
+        curDegY = event.alpha;
+      }
     }
 
     function render() {
