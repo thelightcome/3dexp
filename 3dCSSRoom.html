@@ -439,11 +439,11 @@
 
     function handleOrientation(e) {
       if (checkMobileOrientation()) {
-        curDegX = event.alpha;
-        curDegY = event.beta;
+        curDegX = event.beta - 90;
+        curDegY = event.gamma;
       } else {
-        curDegX = event.beta;
-        curDegY = event.alpha;
+        curDegX = event.gamma - 90;
+        curDegY = event.beta;
       }
     }
 
