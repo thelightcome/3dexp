@@ -641,38 +641,39 @@
         curDegX = changedOrientation.axY + gammaAdd;
         curDegY = changedOrientation.axX + betaAdd;
       }
+    }
 
-      function render() {
-        if (!mobileCheck()) {
-          curDegX += cameraMoveX;
-          if (curDegY + cameraMoveY < 60 && curDegY + cameraMoveY > -60) {
-            curDegY += cameraMoveY;
-          } else if (curDegY + cameraMoveY > 60) {
-            curDegY = 60;
-          } else {
-            curDegY = -60;
-          }
+    function render() {
+      if (!mobileCheck()) {
+        curDegX += cameraMoveX;
+        if (curDegY + cameraMoveY < 60 && curDegY + cameraMoveY > -60) {
+          curDegY += cameraMoveY;
+        } else if (curDegY + cameraMoveY > 60) {
+          curDegY = 60;
+        } else {
+          curDegY = -60;
         }
-        room.style.transform = `rotateX(${curDegY}deg)`;
-        roomIn.style.transform = `rotateY(${curDegX}deg)`;
-        requestAnimationFrame(render);
       }
-
-      function mouseout() {
-        cameraMoveX = 0;
-        cameraMoveY = 0;
-      }
-
-      if (mobileCheck()) {
-        alert("test 9");
-        window.addEventListener("deviceorientation", handleOrientation, true);
-      } else {
-        room.addEventListener("mousemove", cameraMove);
-        room.addEventListener("mouseout", mouseout);
-        window.addEventListener("resize", winResize);
-      }
-
+      room.style.transform = `rotateX(${curDegY}deg)`;
+      roomIn.style.transform = `rotateY(${curDegX}deg)`;
       requestAnimationFrame(render);
+    }
+
+    function mouseout() {
+      cameraMoveX = 0;
+      cameraMoveY = 0;
+    }
+
+    if (mobileCheck()) {
+      alert("test 9");
+      window.addEventListener("deviceorientation", handleOrientation, true);
+    } else {
+      room.addEventListener("mousemove", cameraMove);
+      room.addEventListener("mouseout", mouseout);
+      window.addEventListener("resize", winResize);
+    }
+
+    requestAnimationFrame(render);
   </script>
 </body>
 
