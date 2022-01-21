@@ -171,33 +171,132 @@
     }
 
     .wall-nx {
-      background-image: url('./assets/skyboxs/3room/skybox_nx.jpg');
+      background-image: url('./assets/skyboxs/A-room/skybox_nx.jpg');
+    }
+
+    .nx {
       transform: translateX(calc(-1 * var(--main-size) / 2)) rotateY(90deg);
     }
 
     .wall-px {
-      background-image: url('./assets/skyboxs/3room/skybox_px.jpg');
+      background-image: url('./assets/skyboxs/A-room/skybox_px.jpg');
+    }
+
+    .px {
       transform: translateX(calc(1 * var(--main-size) / 2)) rotateY(-90deg);
     }
 
     .wall-ny {
-      background-image: url('./assets/skyboxs/3room/skybox_ny.jpg');
+      background-image: url('./assets/skyboxs/A-room/skybox_ny.jpg');
+    }
+
+    .ny {
       transform: translateY(calc(1 * var(--main-size) / 2)) rotateX(90deg);
     }
 
     .wall-py {
-      background-image: url('./assets/skyboxs/3room/skybox_py.jpg');
+      background-image: url('./assets/skyboxs/A-room/skybox_py.jpg');
+    }
+
+    .py {
       transform: translateY(calc(-1 * var(--main-size) / 2)) rotateX(-90deg);
     }
 
     .wall-nz {
-      background-image: url('./assets/skyboxs/3room/skybox_nz.jpg');
+      background-image: url('./assets/skyboxs/A-room/skybox_nz.jpg');
+    }
+
+    .nz {
       transform: translateZ(calc(1 * var(--main-size) / 2)) rotateY(180deg);
     }
 
     .wall-pz {
-      background-image: url('./assets/skyboxs/3room/skybox_pz.jpg');
+      background-image: url('./assets/skyboxs/A-room/skybox_pz.jpg');
+    }
+
+    .pz {
       transform: translateZ(calc(-1 * var(--main-size) / 2));
+    }
+
+    .arrow {
+      display: none;
+      cursor: pointer;
+    }
+
+    .arrow img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .room[data-type="A-room"] .nx .arrow {
+      display: block;
+      position: absolute;
+      bottom: 158rem;
+      right: 104rem;
+      width: 60rem;
+      height: 60rem;
+      transform: rotateZ(95deg) rotateY(60deg) scaleX(-1);
+    }
+
+    .room[data-type="Progers"] .nz .arrow {
+      display: block;
+      position: absolute;
+      bottom: 115rem;
+      right: 74rem;
+      width: 60rem;
+      height: 60rem;
+      transform: rotateZ(-45deg) rotateY(45deg);
+    }
+
+    .items {
+      display: none;
+    }
+
+    .room[data-type="Progers"] .items {
+      display: block;
+    }
+
+    .board {
+      position: absolute;
+      top: 180rem;
+      left: 190rem;
+      width: 140rem;
+      height: 130rem;
+      cursor: zoom-in;
+    }
+
+    .modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(25, 25, 25, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      z-index: -50;
+      transition: 0.3s linear;
+    }
+
+    .modal.active {
+      opacity: 1;
+      z-index: 10;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 3rem;
+      right: 5rem;
+      width: 5rem;
+      height: 3rem;
+    }
+
+    .modal img {
+      max-width: 100%;
+      max-height: 100%;
     }
 
     @media only screen and (max-width: 595px) {
@@ -292,7 +391,6 @@
 </head>
 
 <body>
-  <button class="fullscreen"></button>
   <nav>
     <button class="nav-button">
       <span></span>
@@ -313,7 +411,7 @@
         <li data-value="SanFrancisco4">SanFrancisco4</li>
         <li data-value="Teide">Teide</li>
         <li data-value="TropicalSunnyDay">TropicalSunnyDay</li>
-        <li data-value="3room">3room</li>
+        <li data-value="A-room">A-room</li>
       </ul>
 
       <div class="move-speed">
@@ -330,15 +428,47 @@
   </nav>
   <main>
     <div class="playground">
-      <div class="room">
+      <div class="room" data-type="A-room">
         <div class="room-in">
-          <div class="wall wall-nx"></div>
-          <div class="wall wall-px"></div>
-          <div class="wall wall-ny"></div>
-          <div class="wall wall-py"></div>
-          <div class="wall wall-nz"></div>
-          <div class="wall wall-pz"></div>
+          <div class="wall wall-nx nx">
+            <div class="arrow clickable" data-type="arrow" data-dir="nx" data-order="0">
+              <img src="./assets/icon/arrow.png" alt="">
+            </div>
+            <div class="items">
+              <div class="item clickable board" data-type="item" data-name="board"></div>
+            </div>
+          </div>
+          <div class="wall wall-px px">
+            <div class="arrow clickable" data-type="arrow" data-dir="px" data-order="0">
+              <img src="./assets/icon/arrow.png" alt="">
+            </div>
+          </div>
+          <div class="wall wall-ny ny">
+            <div class="arrow clickable" data-type="arrow" data-dir="ny" data-order="0">
+              <img src="./assets/icon/arrow.png" alt="">
+            </div>
+          </div>
+          <div class="wall wall-py py">
+            <div class="arrow clickable" data-type="arrow" data-dir="py" data-order="0">
+              <img src="./assets/icon/arrow.png" alt="">
+            </div>
+          </div>
+          <div class="wall wall-nz nz">
+            <div class="arrow clickable" data-type="arrow" data-dir="nz" data-order="0">
+              <img src="./assets/icon/arrow.png" alt="">
+            </div>
+          </div>
+          <div class="wall wall-pz pz">
+            <div class="arrow clickable" data-type="arrow" data-dir="pz" data-order="0">
+              <img src="./assets/icon/arrow.png" alt="">
+            </div>
+          </div>
         </div>
+      </div>
+      <button class="fullscreen"></button>
+      <div class="modal">
+        <button class="close-modal"></button>
+        <img src="" alt="">
       </div>
     </div>
   </main>
@@ -354,6 +484,9 @@
     const moveSpeedCtrl = document.querySelector(".move-speed");
     const moveSelectSpeedViex = document.querySelector(".move-speed .select span");
     const fullscreenBtn = document.querySelector(".fullscreen");
+    const modal = document.querySelector(".modal");
+    const modalItem = modal.querySelector("img");
+    const closeModalBtn = modal.querySelector(".close-modal");
 
     let playgroundSize = playground.getBoundingClientRect();
     let playgroundWidth = playgroundSize.width;
@@ -365,6 +498,17 @@
     let cameraMoveY = 0;
     let curDegX = 0;
     let curDegY = 0;
+    let currentRoom = "A-room";
+
+    const roomsLink = {
+      "A-room": {
+        nx: ["Progers"],
+      },
+      "Progers": {
+        nz: ["A-room"],
+      },
+    };
+
 
     navButton.addEventListener("click", (e) => {
       nav.classList.toggle("active");
@@ -374,11 +518,41 @@
       let li = e.target.closest(".skybox-menu li");
       if (li) {
         let wallType = li.dataset.value;
-        walls.forEach((wall, wallIndex) => {
-          wall.style.backgroundImage = `url('./assets/skyboxs/${wallType}/${wallsOrder[wallIndex]}.jpg')`;
-        });
+        changeRoom(wallType);
       }
     });
+
+    room.addEventListener("click", (e) => {
+      let target = e.target.closest(".clickable");
+      if (!target) return;
+      switch (target.dataset.type) {
+        case "arrow": {
+          let dir = target.dataset.dir;
+          let order = +target.dataset.order;
+          let nextRoom = roomsLink[currentRoom] && roomsLink[currentRoom][dir] && roomsLink[currentRoom][dir][
+            order
+          ];
+          if (nextRoom) {
+            changeRoom(nextRoom);
+          }
+          break;
+        }
+        case "item": {
+          let itemName = target.dataset.name;
+          modal.classList.add("active");
+          modalItem.src = `./assets/images/${itemName}.jpg`;
+          break;
+        }
+      }
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("dblclick", closeModal);
+
+    function closeModal() {
+      modal.classList.remove("active");
+    }
 
     moveSpeedCtrl.addEventListener("click", (e) => {
       moveSpeedCtrl.classList.toggle("active");
@@ -437,10 +611,23 @@
       return window.clientWidth < window.clientHeight;
     }
 
+    function changeRoom(type) {
+      closeModal();
+      currentRoom = type;
+      room.setAttribute("data-type", type);
+      walls.forEach((wall, wallIndex) => {
+        wall.style.backgroundImage = `url('./assets/skyboxs/${type}/${wallsOrder[wallIndex]}.jpg')`;
+      });
+    }
+
     let betaAdd = 0;
     let gammaAdd = 0;
 
     function handleOrientation(e) {
+      let changedOrientation = {
+        axX: -1 * (e.beta - 90),
+        axY: -1 * e.gamma
+      }
       // if (event.beta >= 180) betaAdd = 180;
       // else if (event.beta <= -180) betaAdd = -180;
       // else betaAdd = 0;
@@ -450,8 +637,10 @@
       // else gammaAdd = 0;
 
       // if (checkMobileOrientation()) {
-      curDegX = -1 * (gammaAdd + event.gamma);
-      curDegY = betaAdd + event.beta - 90;
+      // curDegX = -1 * (gammaAdd + event.gamma);
+      // curDegY = betaAdd + event.beta - 90;
+      curDegX = changedOrientation.axY;
+      curDegY = changedOrientation.axX;
       // } else {
       //   curDegX = betaAdd + event.alpha;
       //   curDegY = gammaAdd + event.beta;
@@ -480,7 +669,7 @@
     }
 
     if (mobileCheck()) {
-      alert("test 8");
+      alert("test 9");
       window.addEventListener("deviceorientation", handleOrientation, true);
     } else {
       room.addEventListener("mousemove", cameraMove);
