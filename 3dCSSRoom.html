@@ -625,59 +625,54 @@
 
     function handleOrientation(e) {
       let changedOrientation = {
-        axX: -1 * (e.beta - 90),
+        axX: e.beta - 90,
         axY: -1 * e.gamma
       }
-      // if (event.beta >= 180) betaAdd = 180;
-      // else if (event.beta <= -180) betaAdd = -180;
-      // else betaAdd = 0;
 
-      // if (event.gamma >= 90) gammaAdd = 180;
-      // else if (event.gamma <= -90) gammaAdd = -180;
-      // else gammaAdd = 0;
+      if (event.beta > 360) betaAdd = 360;
+      else betaAdd = 0;
 
-      // if (checkMobileOrientation()) {
-      // curDegX = -1 * (gammaAdd + event.gamma);
-      // curDegY = betaAdd + event.beta - 90;
-      curDegX = changedOrientation.axY;
-      curDegY = changedOrientation.axX;
-      // } else {
-      //   curDegX = betaAdd + event.alpha;
-      //   curDegY = gammaAdd + event.beta;
-      // }
-    }
+      if (event.gamma > 360) gammaAdd = 360;
+      else gammaAdd = 0;
 
-    function render() {
-      if (!mobileCheck()) {
-        curDegX += cameraMoveX;
-        if (curDegY + cameraMoveY < 60 && curDegY + cameraMoveY > -60) {
-          curDegY += cameraMoveY;
-        } else if (curDegY + cameraMoveY > 60) {
-          curDegY = 60;
-        } else {
-          curDegY = -60;
-        }
+      if (checkMobileOrientation()) {
+        curDegX = -1 * (gammaAdd + event.gamma);
+        curDegY = betaAdd + event.beta - 90;
+        curDegX = changedOrientation.axY + gammaAdd;
+        curDegY = changedOrientation.axX + betaAdd;
       }
-      room.style.transform = `rotateX(${curDegY}deg)`;
-      roomIn.style.transform = `rotateY(${curDegX}deg)`;
+
+      function render() {
+        if (!mobileCheck()) {
+          curDegX += cameraMoveX;
+          if (curDegY + cameraMoveY < 60 && curDegY + cameraMoveY > -60) {
+            curDegY += cameraMoveY;
+          } else if (curDegY + cameraMoveY > 60) {
+            curDegY = 60;
+          } else {
+            curDegY = -60;
+          }
+        }
+        room.style.transform = `rotateX(${curDegY}deg)`;
+        roomIn.style.transform = `rotateY(${curDegX}deg)`;
+        requestAnimationFrame(render);
+      }
+
+      function mouseout() {
+        cameraMoveX = 0;
+        cameraMoveY = 0;
+      }
+
+      if (mobileCheck()) {
+        alert("test 9");
+        window.addEventListener("deviceorientation", handleOrientation, true);
+      } else {
+        room.addEventListener("mousemove", cameraMove);
+        room.addEventListener("mouseout", mouseout);
+        window.addEventListener("resize", winResize);
+      }
+
       requestAnimationFrame(render);
-    }
-
-    function mouseout() {
-      cameraMoveX = 0;
-      cameraMoveY = 0;
-    }
-
-    if (mobileCheck()) {
-      alert("test 9");
-      window.addEventListener("deviceorientation", handleOrientation, true);
-    } else {
-      room.addEventListener("mousemove", cameraMove);
-      room.addEventListener("mouseout", mouseout);
-      window.addEventListener("resize", winResize);
-    }
-
-    requestAnimationFrame(render);
   </script>
 </body>
 
