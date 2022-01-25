@@ -357,7 +357,7 @@
     function createSkyBox(scene) {
       const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: WORLD_SIZE, sideOrientation: BABYLON.Mesh.BACKSIDE}, scene);
       const skyboxMaterial = new BABYLON.BackgroundMaterial("skyBox", scene);
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skyboxs/TropicalSunnyDay/TropicalSunnyDay", scene);
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skyboxs/TropicalSunnyDay/skybox", scene);
       skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
       skybox.material = skyboxMaterial;
     }
