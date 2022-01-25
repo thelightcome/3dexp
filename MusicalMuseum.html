@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museum</title>
+  <script type="module" src="./js/babylon.js"></script>
+  <script type="module" src="./js/babylonjs.loaders.min.js"></script>
+  <style>
+    html,
+    body {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    #target {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      width: 80px;
+      height: 100px;
+      background: url("./assets/icon/note.svg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0;
+      transition: 0.5s ease-in-out;
+      outline: none;
+    }
+
+    #target.active {
+      opacity: 1;
+    }
+
+    #target.hovered {
+      filter: blur(20px);
+    }
+
+    #infoblock {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      max-width: 600px;
+    }
+
+    .wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 40px 40px 60px 30px;
+      border-bottom-left-radius: 35px;
+      overflow: hidden;
+      transition: 0.5s linear;
+    }
+
+    .wrap.active {
+      background: linear-gradient(to top, rgba(47, 42, 34, 0.1) 20%, rgba(47, 42, 34, 0));
+    }
+
+    .wrap-in {
+      transform: translateY(150%);
+      transition: 0s linear;
+    }
+
+    .wrap.active .wrap-in {
+      transform: translateY(0%);
+      transition: 3s linear;
+    }
+
+    .title {
+      font-size: 40px;
+      color: rgba(200, 200, 200);
+      margin: 0;
+      margin-bottom: 30px;
+    }
+
+    .text {
+      font-size: 26px;
+      color: rgba(200, 200, 200);
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
+    }
+
+    .overlay.disable {
+      pointer-events: none;
+      transition: 0.5s linear;
+    }
+
+    #start {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 120px;
+      height: 150px;
+      transform-origin: 50% 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      background: url("./assets/icon/musickey.svg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      transition: 0.5s linear;
+      outline: none;
+    }
+
+    #start:hover {
+      transform: translate(-50%, -50%) rotateZ(20deg);
+    }
+
+    .overlay.disable #start {
+      opacity: 0;
+      transform: translate(-50%, -50%) rotateZ(210deg);
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="infoblock"></div>
+  <div id="target"></div>
+  <div class="overlay">
+    <button id="start"></button>
+  </div>
+  <script type="module">
+    const models = [
+      {
+        id: "kobyz",
+        name: "Кобыз",
+        description: "Кобыз, также кыл-кобыз, нар-кобыз (каз. қобыз, қыл-қобыз, нар-қобыз, башк. ҡыл ҡумыҙ, һыҙма ҡумыҙ) — старинный тюркский струнный смычковый инструмент.",
+        modelPath: "./assets/models/kobyz/",
+        modelName: "kobyz.obj",
+        model: null,
+        modelChange: (meshes, obj) => {
+          const mesh = meshes[0];
+          mesh.name = obj.id;
+          return mesh;
+        },
+        scale: 0.5,
+        color: "#B10DC9",
+        music: "./assets/music/kobyz.mp3",
+      },
+      {
+        id: "dombyra",
+        name: "Домбра",
+        description: "Домбра, также Домбра (ног. домбра, каз. домбыра) — струнный щипковый музыкальный инструмент, который существует в культуре казахов, ногайцев, а также калмыков.",
+        modelPath: "./assets/models/dombyra/export/",
+        modelName: "dombyra.obj",
+        model: null,
+        modelChange: (meshes, obj) => {
+          const mesh = new BABYLON.TransformNode("dombyra");
+          mesh.name = obj.id;
+          meshes.forEach((elem) => {
+            elem.parent = mesh;
+          });
+          return mesh;
+        },
+        scale: 0.5,
+        color: "#FF851B",
+        music: "./assets/music/dombyra.mp3",
+      },
+      {
+        id: "guitar",
+        name: "Гитара",
+        description: "Гитара — струнный щипковый музыкальный инструмент. Применяется в качестве аккомпанирующего или сольного инструмента во многих стилях и направлениях музыки, среди которых романс, блюз, кантри, фламенко, рок, джаз. Изобретённая в XX веке электрическая гитара произвела значительные изменения в музыке и тем самым оказала сильное влияние на массовую культуру. Также есть классическая гитара.",
+        modelPath: "./assets/models/guitar/",
+        modelName: "guitar.obj",
+        model: null,
+        modelChange: (meshes, obj) => {
+          const mesh = new BABYLON.TransformNode("guitar");
+          mesh.name = obj.id;
+          meshes.forEach((elem) => {
+            elem.parent = mesh;
+          });
+          return mesh;
+        },
+        scale: 0.1,
+        color: "#2ECC40",
+        music: "./assets/music/guitar.mp3",
+      },
+      {
+        id: "koto",
+        name: "Кото",
+        description: `Кото — японский щипковый музыкальный инструмент, длинная цитра с подвижными кобылками. Кото наряду с флейтами хаяси и сякухати, барабаном цудзуми и лютней сямисэном относится к традиционным японским музыкальным инструментам. До XX века кото в основном был солирующим инструментом.
+
+        Сходные инструменты характерны для Вьетнама (данчань), Китая (цисяньцинь и сэ) и Кореи (каягым и комунго).
+
+        За века истории кото не претерпел принципиальных изменений в конструкции. В современной Японии кото продолжает использоваться в традиционной и современной музыке, существует две школы исполнения на кото — Икута-рю и Ямада-рю, в прошлом существовали ещё две другие крупные школы, ныне потерявшие популярность`,
+        modelPath: "./assets/models/koto/",
+        modelName: "koto.obj",
+        model: null,
+        modelChange: (meshes, obj) => {
+          const mesh = new BABYLON.TransformNode("koto");
+          mesh.name = obj.id;
+          meshes.forEach((elem) => {
+            elem.parent = mesh;
+          });
+          return mesh;
+        },
+        scale: 0.1,
+        color: "#FF4136",
+        music: "./assets/music/koto.mp3",
+      },
+      {
+        id: "violin",
+        name: "Скрипка",
+        description: `Скрипка — смычковый музыкальный инструмент с четырьмя струнами, настроенными по квинтам: Gм D1 A1 E2. Самая высокая регистровая разновидность скрипичного семейства, ниже которой располагаются альт, виолончель и контрабас.
+
+        Вместе с фортепиано скрипка является главным инструментом академической (классической) музыки. С середины XVIII века она составляет основу симфонического оркестра и струнного квартета. Как народный инструмент продолжает бытовать среди поляков, белорусов, евреев, северо-западных русских, чехов, латышей, шведов, норвежцев, эстонцев, венгров, румын, молдаван, цыган и других народов. В США применяется в музыке кантри, в Индии — в классической музыке традиции карнатака.`,
+        modelPath: "./assets/models/violin/",
+        modelName: "violin.obj",
+        model: null,
+        modelChange: (meshes, obj) => {
+          const mesh = new BABYLON.TransformNode("violin");
+          mesh.name = obj.id;
+          meshes.forEach((elem) => {
+            elem.parent = mesh;
+          });
+          return mesh;
+        },
+        scale: 0.1,
+        color: "#7FDBFF",
+        music: "./assets/music/violin.mp3",
+      }, 
+    ];
+
+    const options = {
+      groundSize: 500,
+      bg: "#2F2A22",
+      ground: "#2F2A22",
+      scale: 1,
+      fogColor: "#2F2A22",
+    };
+
+    const canvas = document.querySelector("#canvas");
+    const target = document.querySelector("#target");
+    const infoblock = document.querySelector("#infoblock");
+    const overlay = document.querySelector(".overlay");
+    const startBtn = document.querySelector("#start");
+    const hpCanvas = document.createElement("canvas");
+    hpCanvas.width = hpCanvas.height = 500;
+    const hpCanvasCtx = hpCanvas.getContext("2d");
+    const engine = new BABYLON.Engine(canvas, true);
+    const { scene, camera, ground } = createScene();
+
+    class SmallLight {
+      constructor() {
+        this.light = new BABYLON.SpotLight("smLight", new BABYLON.Vector3(0, 4, 0), new BABYLON.Vector3(0, -1, 0), Math.PI / 2.5, 20, scene);
+        // this.light0 = new BABYLON.SpotLight("smLight", new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 4, 0), Math.PI / 2.5, 20, scene);
+        // this.light1 = new BABYLON.SpotLight("smLight", new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 4, 0), Math.PI / 2.5, 20, scene);
+        this.light.intensity = 0;
+        // this.light0.intensity = 0;
+        // this.light1.intensity = 0;
+      };
+
+      on(pos) {
+        this.light.position = pos;
+        // this.light0.position = new BABYLON.Vector3(pos.x + 3, 0, pos.z);
+        // this.light1.position = new BABYLON.Vector3(pos.x - 3, 0, pos.z);
+        this.light.intensity = 50;
+        // this.light0.intensity = 50;
+        // this.light1.intensity = 50;
+      }
+
+      off() {
+        this.light.intensity = 0;
+        // this.light0.intensity = 0;
+        // this.light1.intensity = 0;
+      }
+    }
+    
+    const smLight = new SmallLight();
+
+    class Particles {
+      constructor(option) {
+        const particleSystem = new BABYLON.ParticleSystem("particles", 20000, scene);
+        particleSystem.particleTexture = new BABYLON.Texture("./assets/txt/white-point.png", scene);
+        particleSystem.particleTexture.hasAlpha = true;
+        particleSystem.isLocal = true;
+        particleSystem.minSize = 0.005;
+        particleSystem.maxSize = 0.01;
+        particleSystem.minEmitPower = 0.01;
+        particleSystem.maxEmitPower = 0.1;
+        particleSystem.minInitialRotation = 0;
+        particleSystem.maxInitialRotation = Math.PI / 2;
+        particleSystem.minAngularSpeed = 0;
+        particleSystem.maxAngularSpeed = 0;
+        particleSystem.direction1 = new BABYLON.Vector3(0, 0, -0.1).normalize();
+        particleSystem.direction2 = new BABYLON.Vector3(0, 0, -0.1).normalize();
+        particleSystem.emitRate = 50;
+        particleSystem.minLifeTime = 20;
+        particleSystem.maxLifeTime = 50;
+        let r = option.size * 0.9;
+        particleSystem.minEmitBox.x = -r;
+        particleSystem.maxEmitBox.x = r;
+        particleSystem.minEmitBox.y = -r;
+        particleSystem.maxEmitBox.y = r;
+        particleSystem.minEmitBox.z = 0;
+        particleSystem.maxEmitBox.z = 0;
+        particleSystem.updateSpeed = 0.1;
+        this.particleSystem = particleSystem;
+      }
+
+      start(emitter) {
+        this.particleSystem.emitter = emitter;
+        this.particleSystem.start();
+      }
+
+      stop() {
+        this.particleSystem.stop();
+      }
+    }
+
+    const particleSystem = new Particles({ size: 3, angle: Math.PI });
+
+    models.forEach(model => {
+      const wrap = document.createElement("div");
+      wrap.classList.add("wrap");
+      wrap.classList.add(model.id);
+      const wrapIn = document.createElement("div");
+      wrapIn.classList.add("wrap-in");
+      const title = document.createElement("h3");
+      title.innerHTML = model.name;
+      title.classList.add("title");
+      wrapIn.appendChild(title);
+      const text = document.createElement("div");
+      text.innerHTML = model.description;
+      text.classList.add("text");
+      wrapIn.appendChild(text);
+      wrap.appendChild(wrapIn);
+      infoblock.appendChild(wrap);
+    });
+
+    loadModels(models).then(() => {
+      setFigures(models.map((m => m.model)), 15);
+    });
+
+    let hoverMesh;
+    let meshTag;
+
+    scene.onPointerMove = function() {
+      const ray = scene.createPickingRay(canvas.clientWidth / 2, canvas.clientHeight / 2, BABYLON.Matrix.Identity(), scene.activeCameras[0]);	
+      const pick = scene.pickWithRay(ray);
+      let pickedMesh;
+      if (pick.hit) {
+        let mainParent = getMainParent(pick.pickedMesh);
+        pickedMesh = models.find(model => model.id === mainParent.name);
+      }
+      if (!pickedMesh || (hoverMesh && pickedMesh.name !== hoverMesh.name)) {
+        if (hoverMesh) {
+          hoverMesh.music.stop();
+          hoverMesh.model.fogEnabled = true;
+          hoverMesh = undefined;
+          meshTag.classList.remove("active");
+          meshTag = undefined;
+          target.classList.remove("hovered");
+          smLight.off();
+          particleSystem.stop();
+        }
+      }
+      if (pickedMesh) {
+        if (hoverMesh && hoverMesh.name === pickedMesh.name) return;
+        hoverMesh = pickedMesh;
+        hoverMesh.model.fogEnabled = false;
+        meshTag = document.querySelector(`.${pickedMesh.id}`);
+        meshTag.classList.add("active");
+        target.classList.add("hovered");
+        hoverMesh.music.play();
+        smLight.on(new BABYLON.Vector3(hoverMesh.model.position.x, hoverMesh.model.calcHeight + 3, hoverMesh.model.position.z));
+        particleSystem.start(hoverMesh.model.plot);
+      }
+    }
+
+    engine.runRenderLoop(function () {
+      scene.render();
+    });
+
+    window.addEventListener("resize", () => {
+      engine.resize();
+    })
+
+    function getMainParent(mesh) {
+      let parent = mesh;
+      while (parent.parent !== null) {
+        parent = parent.parent;
+      }
+      return parent;
+    }
+
+    function loadModels(list) {
+      let length = list.length;
+      
+      return new Promise((res, rej) => {
+        list.forEach((obj) => {
+          BABYLON.SceneLoader.ImportMesh("", obj.modelPath, obj.modelName, scene, function (newMeshes) {
+            obj.model = obj.modelChange(newMeshes, obj);
+            obj.music = new BABYLON.Sound(`music - ${ obj.modelName }`, obj.music, scene, null, { volume: 0.5 });
+            obj.model.isPickable = true;
+            scene.registerBeforeRender(function () {
+              obj.model.rotation.y += 0.005;
+            });
+            length--;
+            if (length === 0) {
+              res();
+            }
+          });
+        });
+      });
+    }
+
+    function createScene() {
+      const scene = new BABYLON.Scene(engine);
+      scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
+      scene.clearColor = new BABYLON.Color3.FromHexString(options.bg);
+      scene.fogColor = new BABYLON.Color3.FromHexString(options.fogColor);
+      scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
+      scene.collisionsEnabled = true;
+      createPointerLock(scene);
+
+      const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 3, 0));
+      camera.applyGravity = true;
+      camera.ellipsoid = new BABYLON.Vector3(1, 3, 1);
+      camera.checkCollisions = true;
+      camera.speed = 0;
+      camera.inertia = 0.8;
+      camera.fov = 0.3;
+      camera.angularSensibility = 3000;
+      camera.attachControl(canvas, true);
+      const groundHalf = options.groundSize / 2;
+      scene.beforeRender = function() {
+        if (camera.rotation.x < -0.005) camera.rotation.x = -0.005;
+        if (camera.rotation.x > 0.1) camera.rotation.x = 0.1;
+        if (camera.position.x < -groundHalf) camera.position.x = -groundHalf;
+        if (camera.position.x > groundHalf) camera.position.x = groundHalf;
+        if (camera.position.z < -groundHalf) camera.position.z = -groundHalf;
+        if (camera.position.z > groundHalf) camera.position.z = groundHalf;
+      };
+
+      const ground = BABYLON.MeshBuilder.CreateGround("ground", {
+        width: options.groundSize,
+        height: options.groundSize,
+      }, scene);
+      const groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+      groundMaterial.diffuseColor = new BABYLON.Color3.FromHexString(options.ground);
+      ground.material = groundMaterial;
+      ground.checkCollisions = true;
+      ground.receiveShadows = true;
+
+      const spotLight = new BABYLON.SpotLight("SpotLight", new BABYLON.Vector3(0, 300, 0), new BABYLON.Vector3(0, -1, 0), Math.PI / 3, 2, scene);
+      spotLight.intensity = 3;
+
+      return {
+        scene,
+        camera,
+        ground,
+      };
+    }
+
+    function setFigures(figures, distance) {
+      const deltaAngle = 2 * Math.PI / figures.length;
+
+      figures.forEach(async (figure, index) => {
+        const { x, z } = getCoord(deltaAngle * index, distance);
+        const boundSize = getBoundingSize(figure);
+        figure.position = new BABYLON.Vector3(x, boundSize.height / 2 + 0.5, z);
+        figure.calcHeight = boundSize.height;
+        figure.plot = await setPlot(index, { width: 1 }, new BABYLON.Vector3(x, 0.001, z));
+      });
+    }
+
+    async function setPlot(index, size, position) {
+      const plot = BABYLON.MeshBuilder.CreateDisc(`plot-${index}`, {
+        radius: size.width * 3,
+      }, scene);
+      
+      const plotMat = new BABYLON.StandardMaterial(`plot-mat-${index}`, scene);
+      const dynamicTexture = new BABYLON.DynamicTexture("dynamicTexture", hpCanvas, scene, true);
+      await changeImgColor(hpCanvasCtx, hpCanvas, `./assets/images/ornaments/${Math.round(getRandomSize(1, 11))}.png`, getRandomHexColor());
+      dynamicTexture.update();
+      plotMat.diffuseTexture = dynamicTexture;
+      plotMat.diffuseColor = new BABYLON.Color3(255, 255, 255);
+      plotMat.diffuseTexture.hasAlpha = true;
+      plotMat.fogEnabled = false;
+      plotMat.disableLightingSearch = true;
+      plot.material = plotMat;
+      plot.position = position;
+      plot.rotation.x = Math.PI / 2;
+      scene.registerBeforeRender(function () {
+        plot.rotation.z += 0.005;
+      });
+      return plot;
+    }
+
+    async function changeImgColor(ctx, canvas, imgPath, color) {
+      const img = await downloadImage(imgPath);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const {h, s, l} = getHSLFromHex(color);
+
+      ctx.globalCompositeOperation = "saturation";
+      ctx.fillStyle = "hsl(0," + s + "%, 50%)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.globalCompositeOperation = "hue";
+      ctx.fillStyle = "hsl(" + h + ",1%, 50%)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      ctx.globalCompositeOperation = "source-over";
+
+      img.src = canvas.toDataURL();
+
+      return img;
+    }
+
+    function getHSLFromHex(hex) {
+      let { r, g, b } = hexTo16Format(hex);
+      r /= 255;
+      g /= 255;
+      b /= 255;
+      const cmin = Math.min(r, g, b);
+      const cmax = Math.max(r, g, b);
+      const delta = cmax - cmin;
+      let h, s, l = 0;
+
+      if (delta == 0) h = 0;
+      else if (cmax == r) h = ((g - b) / delta) % 6;
+      else if (cmax == g) h = (b - r) / delta + 2;
+      else h = (r - g) / delta + 4;
+
+      h = Math.round(h * 60);
+
+      if (h < 0) h += 360;
+
+      l = (cmax + cmin) / 2;
+      s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+      s = +(s * 100).toFixed(1);
+      l = +(l * 100).toFixed(1);
+
+      return {h, s, l};
+    }
+
+    function hexTo16Format(hex) {
+      return {
+        r: "0x" + hex[1] + hex[2],
+        g: "0x" + hex[3] + hex[4],
+        b: "0x" + hex[5] + hex[6],
+      }
+    }
+
+    function downloadImage(src) {
+      return new Promise((res, rej) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          res(img);
+        };
+        img.onerror = (err) => {
+          rej(err);
+        };
+      });
+    }
+
+    function getBoundingSize(figure) {
+      let boundBox = {};
+
+      if (figure.getBoundingInfo) {
+        boundBox = figure.getBoundingInfo().boundingBox.vectorsWorld;
+      } else {
+        let childs = figure.getChildMeshes();
+        if (childs) {
+          let min = childs[0].getBoundingInfo().boundingBox.minimumWorld;
+          let max = childs[0].getBoundingInfo().boundingBox.maximumWorld;
+
+          for(let i = 0; i < childs.length; i++){
+            let meshMin = childs[i].getBoundingInfo().boundingBox.minimumWorld;
+            let meshMax = childs[i].getBoundingInfo().boundingBox.maximumWorld;
+
+            min = BABYLON.Vector3.Minimize(min, meshMin);
+            max = BABYLON.Vector3.Maximize(max, meshMax);
+          }
+
+          boundBox = [min, max];
+        }
+      }
+      
+      return {
+        height: boundBox[1].y - boundBox[0].y,
+        width: boundBox[1].x - boundBox[0].x,
+        depth: boundBox[1].z - boundBox[0].z,
+      };
+    }
+
+    function getCoord(angle, distance) {
+      return {
+        x: Math.round(Math.cos(angle) * distance * 100) * 0.01,
+        z: Math.round(Math.sin(angle) * distance * 100) * 0.01,
+      };
+    }
+
+    function getRandomSize(min, max) {
+      return Math.round(Math.random() * (max - min) * 100) * 0.01 + min;
+    }
+  
+    function getRandomHexColor() {
+      return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    }
+
+    function createPointerLock(scene) {
+      let canvas = scene.getEngine().getRenderingCanvas();
+      let state = false;
+
+      startBtn.addEventListener("click", (click) => {
+        if (state) return;
+        canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+        if(canvas.requestPointerLock) {
+          canvas.requestPointerLock();
+        }
+        overlay.classList.add("disable");
+        target.classList.add("active");
+      }, false);
+     
+      function lockChangeAlert() {
+        state = !state;
+        if (!state) {
+          target.classList.remove("active");
+          overlay.classList.remove("disable");
+        }
+      }
+      document.addEventListener('pointerlockchange', lockChangeAlert, false);
+      document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+      document.addEventListener('webkitpointerlockchange', lockChangeAlert, false);
+    };
+
+    // const objects = [];
+
+    // for (let i = 0; i < 10; i += 1) {
+    //   objects.push(testSphere());
+    // }
+
+    // setFigures(objects, 20);
+
+    // function testSphere() {
+    //   const sphere = BABYLON.MeshBuilder.CreateSphere("sphere" + Math.random(), { segments: 32, diameter: 1 }, scene);
+    //   const sphereMaterial = new BABYLON.StandardMaterial("sphere" + Math.random(), scene);
+    //   const color = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+    //   sphereMaterial.diffuseColor = color;
+    //   sphereMaterial.ambientColor = color;
+    //   sphere.material = sphereMaterial;
+    //   sphere.castShadow = true;
+    //   return sphere;
+    // }
+  </script>
+</body>
+
+</html>
