@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      margin: 0;
+      font-size: 4px;
+    }
+
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      perspective: 600px;
+      background: radial-gradient(#333333, #020202);
+    }
+
+    .loading_in {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 10rem;
+      font-weight: bold;
+      transform-origin: 50% 50%;
+    }
+
+    .loading_center {
+      position: relative;
+      width: 20%;
+      text-align: center;
+      animation: rotate 0.5s linear;
+      transform-origin: 50% 50%;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes rotate {
+      0% {
+        transform: scale(0) rotateY(180deg);
+      }
+
+      100% {
+        transform: scale(1) rotateY(0deg);
+      }
+    }
+
+    .letter {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
+      transform: translateX(0%);
+      text-shadow: -1px -1px rgba(2, 2, 2, 0.3);
+    }
+
+    .letter.c {
+      color: #138959;
+      z-index: 80;
+      animation: animC 0.5s cubic-bezier(.17, .67, .9, 1.45) 0.5s forwards;
+    }
+
+    @keyframes animC {
+      0% {
+        transform: translateX(0%);
+      }
+
+      100% {
+        transform: translateX(-200%);
+      }
+    }
+
+    .letter.a {
+      color: #23A468;
+      z-index: 40;
+      animation: animA 0.5s cubic-bezier(.17, .67, .9, 1.45) 1s forwards;
+    }
+
+    @keyframes animA {
+      0% {
+        transform: translateX(0%);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    .letter.c2 {
+      color: #29A995;
+      z-index: 60;
+      animation: animC2 0.5s cubic-bezier(.17, .67, .9, 1.45) 1.5s forwards;
+    }
+
+    @keyframes animC2 {
+      0% {
+        transform: translateX(0%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .letter.g {
+      z-index: 20;
+      color: #0086BB;
+      animation: animG 0.5s cubic-bezier(.17, .67, .9, 1.45) 2s forwards;
+    }
+
+    @keyframes animG {
+      0% {
+        transform: translateX(0%);
+      }
+
+      100% {
+        transform: translateX(200%);
+      }
+    }
+
+    .logo {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      animation: tick 1s linear infinite alternate;
+      transform-style: preserve-3d;
+      z-index: 100;
+    }
+
+    @keyframes tick {
+      0% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(1.1);
+      }
+    }
+
+    .logo img {
+      width: 100%;
+      height: auto;
+    }
+
+    .logo-img {
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-shadow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      backface-visibility: hidden;
+      opacity: 0.3;
+      filter: blur(5px);
+    }
+
+    @media only screen and (min-width: 600px) {
+
+      html,
+      body {
+        font-size: 6px;
+      }
+    }
+
+    @media only screen and (min-width: 768px) {
+
+      html,
+      body {
+        font-size: 7px;
+      }
+    }
+
+    @media only screen and (min-width: 889px) {
+
+      html,
+      body {
+        font-size: 8px;
+      }
+    }
+
+    @media only screen and (min-width: 1200px) {
+
+      html,
+      body {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loading">
+    <div class="loading_in">
+      <div class="loading_center">
+        <span class="letter c">C</span>
+        <span class="letter a">A</span>
+        <span class="letter c2">C</span>
+        <span class="letter g">G</span>
+        <span class="logo">
+          <img class="logo-shadow" src="./assets/logos/logo-shadow.png" alt="">
+          <img class="logo-img" src="./assets/logos/logo.png" alt="">
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class LoadAnim {
+      constructor(selector, letters, light, logoShadow) {
+        this.item = document.querySelector(selector);
+        this.light = document.querySelector(light);
+        this.logoShadow = document.querySelector(logoShadow);
+        this.letters = document.querySelectorAll(letters);
+        this.centerX = window.innerWidth / 2;
+        this.centerY = window.innerHeight / 2;
+        this.shShift = -10
+      }
+
+      resize() {
+        this.centerX = window.innerWidth / 2;
+        this.centerY = window.innerHeight / 2;
+      }
+
+      rotate(e) {
+        let dx = (e.clientX - this.centerX) / this.centerX * 2,
+          dy = (e.clientY - this.centerY) / this.centerY * 2;
+        this.item.style.transform = `skewY(${dy}deg) rotateY(${dx}deg)`;
+        this.light.style.background =
+          `radial-gradient(ellipse at ${50 + this.shShift * dx}% ${50 + this.shShift * dy}%, #333333, #020202)`;
+        this.logoShadow.style.transform = `translate(${this.shShift * dx}px, ${this.shShift * dy}px)`;
+        for (let i = 0; i < this.letters.length; i += 1) {
+          this.letters[i].style.textShadow = `${this.shShift * dx}px ${this.shShift * dy}px 6px rgba(2, 2, 2, 0.5)`;
+        }
+      }
+
+      start() {
+        this.item.addEventListener("mousemove", (e) => {
+          this.rotate(e);
+        });
+      }
+    }
+
+    let loadAnim = new LoadAnim(".loading_in", ".letter", ".loading", ".logo-shadow");
+    loadAnim.start();
+  </script>
+</body>
+
+</html>
